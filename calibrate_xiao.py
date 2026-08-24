@@ -112,7 +112,9 @@ def main():
         per_img = []
         for i in range(len(op)):
             proj, _ = cv2.projectPoints(op[i], rvecs[i], tvecs[i], K, dist)
-            err = cv2.norm(ip[i], proj, cv2.NORM_L2) / len(proj)
+            a = np.asarray(ip[i], dtype=np.float64).reshape(-1, 2)
+            b = np.asarray(proj, dtype=np.float64).reshape(-1, 2)
+            err = float(np.sqrt(np.mean(np.sum((a - b) ** 2, axis=1))))
             per_img.append(err)
         return rms, K, dist, per_img
 
