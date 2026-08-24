@@ -15,9 +15,9 @@
 // =====================================================================
 
 // ---------------------- GEOMETRIC (locked) ---------------------------
-#define WC_FRAMESIZE   FRAMESIZE_QVGA   // 320x240
-#define WC_EXPECT_W    320
-#define WC_EXPECT_H    240
+#define WC_FRAMESIZE  FRAMESIZE_VGA
+#define WC_EXPECT_W   640
+#define WC_EXPECT_H   480
 #define WC_HMIRROR     0                // mirroring moves cx. Must match.
 #define WC_VFLIP       0                // flipping moves cy. Must match.
 #define WC_DCW         1                // downsize/crop window: changes FOV
