@@ -129,8 +129,7 @@ static void detectorInit() {
 // Area of a perspective-skewed quad, from its two diagonals.
 // Templated because this port converts the upstream doubles to float --
 // this compiles either way, so you never have to chase a type mismatch here.
-template <typename T>
-static inline float quadArea(const T p[4][2]) {
+static inline float quadArea(const float p[4][2]) {
   float d1x = p[2][0] - p[0][0], d1y = p[2][1] - p[0][1];
   float d2x = p[3][0] - p[1][0], d2y = p[3][1] - p[1][1];
   return 0.5f * fabsf(d1x * d2y - d1y * d2x);
