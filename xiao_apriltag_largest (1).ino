@@ -29,8 +29,8 @@ extern "C" {
 //   Faster, less range ->  FRAMESIZE_VGA  (640x480) + 1.0
 //   Fastest, short     ->  FRAMESIZE_QVGA (320x240) + 1.0
 // =========================================================================
-#define FRAME_SIZE            FRAMESIZE_SVGA
-#define QUAD_DECIMATE         1.0f
+#define FRAME_SIZE            FRAMESIZE_QVGA
+#define QUAD_DECIMATE         2.0f
 
 #define MIN_DECISION_MARGIN   30.0f   // reject weak decodes
 #define REPORT_EVERY          30      // frames per bench-test summary line
@@ -96,17 +96,17 @@ static bool cameraInit() {
   if (esp_camera_init(&c) != ESP_OK) return false;
 
   sensor_t *s = esp_camera_sensor_get();
-  s->set_exposure_ctrl(s, 0);    // manual exposure: kills motion blur
+  s->set_exposure_ctrl(s, 1);    // manual exposure: kills motion blur
   s->set_aec2(s, 0);
-  s->set_aec_value(s, 120);      // tune 40..400 for your lighting
-  s->set_gain_ctrl(s, 0);
-  s->set_agc_gain(s, 4);         // tune 0..30
+  //s->set_aec_value(s, 100);      // tune 40..400 for your lighting
+  s->set_gain_ctrl(s, 1);
+  //s->set_agc_gain(s, 8);         // tune 0..30
   s->set_contrast(s, 2);
   s->set_brightness(s, 0);
   s->set_whitebal(s, 0);
   s->set_lenc(s, 1);
   s->set_hmirror(s, 0);
-  s->set_vflip(s, 0);
+  s->set_vflip(s, 1);
   return true;
 }
 
@@ -120,7 +120,7 @@ static void detectorInit() {
   // after you have single-threaded detection working end to end.
   td->quad_decimate     = QUAD_DECIMATE;
   td->quad_sigma        = 0.0f;
-  td->nthreads          = 1;
+  td->nthreads          = 2;
   td->refine_edges      = 1;
   td->decode_sharpening = 0.25;
   td->debug             = 0;
@@ -139,10 +139,18 @@ static inline float quadArea(const float p[4][2]) {
 static void visionTask(void *) {
   uint32_t nFrames = 0, nHits = 0;
   float    sumSide = 0, sumDm = 0, sumMs = 0;
-
+  int      lastId = -1;
   for (;;) {
     camera_fb_t *fb = esp_camera_fb_get();
     if (!fb) { vTaskDelay(pdMS_TO_TICKS(10)); continue; }
+
+    static bool dumped = false;
+    if (!dumped) {
+      dumped = true;
+      Serial.printf("DUMP %d %d %d\n", fb->width, fb->height, fb->len);
+      for (size_t i = 0; i < fb->len; i++) Serial.printf("%02x", fb->buf[i]);
+      Serial.println();
+    }
 
     image_u8_t im = {
       .width  = (int32_t)fb->width,
@@ -195,7 +203,7 @@ static void visionTask(void *) {
     // ---- bench-test summary, one line per REPORT_EVERY frames ----
     nFrames++;
     sumMs += dt;
-    if (best) { nHits++; sumSide += side; sumDm += best->decision_margin; }
+    if (best) { nHits++; sumSide += side; sumDm += best->decision_margin; lastId = best->id;}
     if (nFrames >= REPORT_EVERY) {
       Serial.printf("hit=%lu/%d  id=%d  side=%.1fpx  dm=%.0f  %.0fms\n",
                     (unsigned long)nHits, REPORT_EVERY,
@@ -204,8 +212,9 @@ static void visionTask(void *) {
                     nHits ? sumDm   / nHits : 0.0f,
                     sumMs / (float)REPORT_EVERY);
       nFrames = nHits = 0; sumSide = sumDm = sumMs = 0;
+      lastId = -1;
     }
-
+    Serial.printf("raw=%d\n", zarray_size(dets));
     apriltag_detections_destroy(dets);
     esp_camera_fb_return(fb);
   }
