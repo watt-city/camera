@@ -6,10 +6,10 @@ Same maths as check_pose.py, but continuous and with a preview window, so you
 can position the target while watching the numbers instead of firing a single
 blind frame.
 
-    py live_pose.py --intrinsics xiao_intrinsics.json --mode board \
+    python check_pose.py --intrinsics xiao_intrinsics.json --mode board \
         --square 18.3 --url http://192.168.1.235/capture --expect 300
 
-    py live_pose.py --intrinsics xiao_intrinsics.json --mode tag \
+    python check_pose.py --intrinsics xiao_intrinsics.json --mode tag \
         --tag-size 52 --url http://192.168.1.235/capture --expect 500
 
 Keys:  s = print a line to the terminal    q = quit

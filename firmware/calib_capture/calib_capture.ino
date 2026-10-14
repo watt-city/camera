@@ -6,9 +6,9 @@
 // geometry the intrinsics are fitted to is the geometry you deploy.
 //
 // SETUP
-//   1. Put this file in a folder named calib_capture/ together with a
-//      copy of camera_cfg.h  (Arduino requires folder name == .ino name)
-//   2. Fill in WIFI_SSID / WIFI_PASS below
+//   1. Open this folder in the Arduino IDE (camera_cfg.h is already here;
+//      it is a copy of firmware/shared/camera_cfg.h)
+//   2. Copy secrets.example.h to secrets.h and fill in WIFI_SSID / WIFI_PASS
 //   3. Tools > Board          : XIAO_ESP32S3
 //      Tools > PSRAM          : OPI PSRAM      <-- required
 //   4. Upload, open Serial Monitor @ 115200, note the printed IP
@@ -27,8 +27,9 @@
 #include <WebServer.h>
 
 // ---------------------------------------------------------------------
-const char *WIFI_SSID = "YOUR_SSID";
-const char *WIFI_PASS = "YOUR_PASSWORD";
+// WiFi credentials live in secrets.h (gitignored -- this repo is public).
+// Copy secrets.example.h to secrets.h and fill in your network.
+#include "secrets.h"
 // ---------------------------------------------------------------------
 
 // Quality 4 = near-lossless. JPEG ringing moves subpixel corners, and a
