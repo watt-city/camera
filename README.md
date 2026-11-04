@@ -12,9 +12,7 @@ Part of [WATT City](https://github.com/watt-city), IEEE WATT's year-long project
 
 ```
 firmware/
-  xiao_apriltag_largest/   ← THE WORKING DETECTOR. Start here.
-  vision_node_watt_link/   ← Older (July) detector that sends the binary packet the car's main_board expects
-    watt_link.h            ← Shared message format (same file as autonomous-car/firmware/main_board/)
+  xiao_apriltag_largest/   ← The AprilTag detector. Flash this to the XIAO.
 ```
 
 ## Setup
@@ -39,16 +37,17 @@ Current settings: `FRAME_SIZE` QVGA (320×240), `QUAD_DECIMATE` 2.0, 1-bit error
 
 Pose/range output (`ENABLE_POSE`) is off. It needs camera intrinsics from a calibration we don't currently use; reading tag IDs doesn't need them.
 
-## Known issues / open decisions
+## Talking to the car
 
-- **UART format mismatch with the car.** `xiao_apriltag_largest` sends text `TAG,...` lines, but the car's `main_board` firmware expects the binary `VisionPacket` from `watt_link.h` (`[0xAA][0x55][type][len][payload][checksum]`). `vision_node_watt_link` speaks the binary format but predates the tuning work. **Camera + Car teams: pick one format before integration.**
-- **`vision_node_watt_link` uses the wrong tag size** (`TAG_SIZE_M = 0.05`; ours is 0.037 m), so its range estimate reads about 35% long. Only matters if that sketch is used.
+The car reads these `TAG,...` text lines directly. The format and the car's parser (`watt_parse_tag_line()`) live in [`autonomous-car/firmware/main_board/watt_link.h`](https://github.com/watt-city/autonomous-car/blob/main/firmware/main_board/watt_link.h). **If you change the line format, change that parser too.**
+
+Wiring: XIAO D6 (TX) → car main board RX, plus a common GND.
 
 ## History
 
 Calibration tools (checkerboard capture server, focus meter, OpenCV calibration and pose-check scripts) were removed in Nov 2026 because the working detector doesn't use them. They're in git history before that commit if anyone needs pose later.
 
-`firmware/vision_node_watt_link/` came from the former `watt-city/car-code` repo (now archived) and was merged here with its commit history.
+An older detector, `vision_node_watt_link` (July, from the former `car-code` repo), sent a binary packet to the car. It was removed in Nov 2026 when the team chose the text format; it's in git history.
 
 ## Contributing
 
