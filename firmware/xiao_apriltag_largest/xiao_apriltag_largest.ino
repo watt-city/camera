@@ -25,9 +25,10 @@ extern "C" {
 
 // =========================================================================
 // TUNE THESE TWO TOGETHER
-//   Longest range      ->  FRAMESIZE_SVGA (800x600) + 1.0   <- start here
+//   Longest range      ->  FRAMESIZE_SVGA (800x600) + 1.0
 //   Faster, less range ->  FRAMESIZE_VGA  (640x480) + 1.0
 //   Fastest, short     ->  FRAMESIZE_QVGA (320x240) + 1.0
+//   CURRENT (what works on our bench): QVGA + 2.0
 // =========================================================================
 #define FRAME_SIZE            FRAMESIZE_QVGA
 #define QUAD_DECIMATE         2.0f
@@ -96,10 +97,10 @@ static bool cameraInit() {
   if (esp_camera_init(&c) != ESP_OK) return false;
 
   sensor_t *s = esp_camera_sensor_get();
-  s->set_exposure_ctrl(s, 1);    // manual exposure: kills motion blur
+  s->set_exposure_ctrl(s, 1);    // 1 = AUTO exposure. For manual (less motion blur): 0 + set_aec_value below
   s->set_aec2(s, 0);
   //s->set_aec_value(s, 100);      // tune 40..400 for your lighting
-  s->set_gain_ctrl(s, 1);
+  s->set_gain_ctrl(s, 1);        // 1 = AUTO gain. For manual: 0 + set_agc_gain below
   //s->set_agc_gain(s, 8);         // tune 0..30
   s->set_contrast(s, 2);
   s->set_brightness(s, 0);
@@ -127,8 +128,7 @@ static void detectorInit() {
 }
 
 // Area of a perspective-skewed quad, from its two diagonals.
-// Templated because this port converts the upstream doubles to float --
-// this compiles either way, so you never have to chase a type mismatch here.
+// Takes float corners because this port converts the upstream doubles to float.
 static inline float quadArea(const float p[4][2]) {
   float d1x = p[2][0] - p[0][0], d1y = p[2][1] - p[0][1];
   float d2x = p[3][0] - p[1][0], d2y = p[3][1] - p[1][1];
@@ -143,14 +143,6 @@ static void visionTask(void *) {
   for (;;) {
     camera_fb_t *fb = esp_camera_fb_get();
     if (!fb) { vTaskDelay(pdMS_TO_TICKS(10)); continue; }
-
-    static bool dumped = false;
-    if (!dumped) {
-      dumped = true;
-      Serial.printf("DUMP %d %d %d\n", fb->width, fb->height, fb->len);
-      for (size_t i = 0; i < fb->len; i++) Serial.printf("%02x", fb->buf[i]);
-      Serial.println();
-    }
 
     image_u8_t im = {
       .width  = (int32_t)fb->width,
@@ -207,14 +199,13 @@ static void visionTask(void *) {
     if (nFrames >= REPORT_EVERY) {
       Serial.printf("hit=%lu/%d  id=%d  side=%.1fpx  dm=%.0f  %.0fms\n",
                     (unsigned long)nHits, REPORT_EVERY,
-                    best ? best->id : -1,
+                    lastId,               // most recent tag seen in this 30-frame window
                     nHits ? sumSide / nHits : 0.0f,
                     nHits ? sumDm   / nHits : 0.0f,
                     sumMs / (float)REPORT_EVERY);
       nFrames = nHits = 0; sumSide = sumDm = sumMs = 0;
       lastId = -1;
     }
-    Serial.printf("raw=%d\n", zarray_size(dets));
     apriltag_detections_destroy(dets);
     esp_camera_fb_return(fb);
   }
