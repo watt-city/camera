@@ -21,4 +21,4 @@
 ## Checklist
 - [ ] No WiFi passwords, keys, or tokens in the diff
 - [ ] Pin numbers / wiring changes are reflected in the README and hardware log
-- [ ] KiCad: I claimed this board in an issue, and no backup/lock files are included
+- [ ] Edited only `firmware/shared/camera_cfg.h` and ran `python tools/sync_camera_cfg.py --check`

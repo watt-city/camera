@@ -89,8 +89,8 @@ python tools/sync_camera_cfg.py --check  # verify (run before opening a PR)
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before your first push. In short: branch off `main`, open a pull request, get one review, never commit WiFi passwords, and log every test in the hardware log.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before your first push. In short: pull before you start, push when you finish; push straight to `main` for `calibration/`, `tools/` and docs; **use a branch + pull request for anything in `firmware/`**; never commit WiFi passwords; log every test in the hardware log.
 
 ## History
 
-`firmware/vision_node_watt_link/` came from the former `watt-city/car-code` repo and was merged here with its commit history.
+`firmware/vision_node_watt_link/` came from the former `watt-city/car-code` repo (now archived) and was merged here with its commit history.
