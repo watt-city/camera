@@ -18,7 +18,6 @@ KiCad schematic (`.kicad_sch`) and board (`.kicad_pcb`) files **cannot be merged
 
 ### 3. Push straight to `main`, or make a branch?
 - **Push straight to `main`** when you are:
-  - updating the Python tools in `calibration/` or `tools/`
   - updating READMEs or documentation
 - **Make a branch** for anything in `firmware/`, the code that drives the car:
   - Treat `firmware/` on `main` as **working code**.

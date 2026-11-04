@@ -21,4 +21,4 @@
 ## Checklist
 - [ ] No WiFi passwords, keys, or tokens in the diff
 - [ ] Pin numbers / wiring changes are reflected in the README and hardware log
-- [ ] Edited only `firmware/shared/camera_cfg.h` and ran `python tools/sync_camera_cfg.py --check`
+- [ ] Bench-tested with the 30-frame summary (hit rate, ms/frame) and noted the numbers in the hardware log

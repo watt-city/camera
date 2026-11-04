@@ -1,9 +1,6 @@
 # ---- Secrets: never commit WiFi passwords or keys (repo is public) ----
 secrets.h
 
-# ---- Calibration captures: large image sets go in the shared folder ----
-captures/
-
 # ---- Python ----
 __pycache__/
 .venv/
